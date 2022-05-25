@@ -136,157 +136,13 @@ int main(void)
   uint8_t eight_bits = 0x3;
 
 
-  //uint64_t Data_ans[256];
-  //Flash_Read_Data(Address,&Data_ans,256);
-  //uint64_t Data_ans2[256];
+
   HAL_Delay(10);
-  //Write_Flash(Address2,&variable1,bytes_write);
-  /*uint64_t eight_bytes = eight_bits;*/
-  /*uint16_t bytes_write = sizeof(eight_bytes)/8;*/
-  /*Flash_Write_Data(Address2,&eight_bytes,bytes_write);//THIS LINE WORKS*/
-/*
-  uint16_t bytes_read = sizeof(Read)/8;
-  Flash_Read_Data(Address,&Read,bytes_read);*/
 
 
-  /*
-  //Erase
-  static FLASH_EraseInitTypeDef EraseInitStruct;
-  uint32_t PAGEError;
-  EraseInitStruct.Banks = FLASH_BANK_1;//Bank where the erase address is located
-  EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;//Erase by page
-  EraseInitStruct.Page = (Address-FLASH_BASE)/FLASH_PAGE_SIZE;//Get page position
-  EraseInitStruct.NbPages = 1;//Erase 1 page
-  if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK) {
-  		return HAL_FLASH_GetError();
-
-  }
-
-  //Write
-  uint16_t bytes_write = sizeof(Data)/8;
-  uint32_t write_address = Address;
-  uint8_t position_wr = 0;
-  while(bytes_write > 0){
-	  HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, write_address, Data[position_wr]);
-	  write_address += 8;
-	  bytes_write--;
-	  position_wr++;
-  }
-
-
-  HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, Address2, Data2);
-
-  //Read
-  uint16_t bytes_read = sizeof(Read)/8;
-  Read2 = *(__IO uint64_t*) Address2;
-  uint32_t read_address = Address;
-  uint8_t position_rd = 0;
-
-  while (bytes_read > 0) {
-	  Read[position_rd] = *(__IO uint64_t*) read_address;
-	  read_address += 8;
-	  bytes_read--;
-	  position_rd++;
-  }
-
-  HAL_FLASH_Lock();
-  */
   //TIMER TESTING
   HAL_TIM_Base_Start_IT(&htim16);
 
-
-  // TEST WITH THE EEPROM EMULATION FILES
-  /*
-  //uint32_t len = ;
-  uint8_t provaaWrite = 0xCD;
-  uint8_t provaaRead = 0;
-  bool write_done;
-  bool read_done;
-  ee_init();
-  DelayMs( 300 );
-  write_done = ee_write(0x0800D000 , sizeof(provaaWrite), &provaaWrite);
-  //Flash_Write_Data(CURRENT_STATE_ADDR,&provaaWrite,sizeof(provaaWrite)/8);
-  DelayMs( 300 );
-  read_done = ee_read(0x0800D000, sizeof(provaaRead), &provaaRead);
-  //Flash_Read_Data(CURRENT_STATE_ADDR,&provaaRead,sizeof(provaaRead)/8);
-
-  DelayMs( 300 );
-*/
-
-
-
-/*
-  char *data = "hello FLASH from ControllerTech\
-  			  This is a test to see how many words can we work with";
-
-  uint64_t data2[] = {0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9};
-
-  uint64_t Rx_Data[30];
-
-  char string[100];
-
-  int number = 123;
-
-  float val = 123.456;
-
-  float RxVal;
-
-
-  Flash_Write_Data(0x08004410 , (uint64_t *)data2, 9);
-  Flash_Read_Data(0x08004410 , Rx_Data, 10);
-
-
-  int numofwords = (strlen(data)/8)+((strlen(data)%8)!=0);
-  Flash_Write_Data(0x08004810 , (uint64_t *)data, numofwords);
-  Flash_Read_Data(0x08004810 , Rx_Data, numofwords);
-  Convert_To_Str(Rx_Data, string);
-
-
-  Flash_Write_NUM(0x08005C10, number);
-  RxVal = Flash_Read_NUM(0x08005C10);
-
-  Flash_Write_NUM(0x08012000, val);
-  RxVal = Flash_Read_NUM(0x08012000);
-  */
-
-
-
-
-  //THIS CODE WORKS WELL
-  /*
-  uint64_t provaaWrite = 0xCDFFAFAB;
-  uint64_t provaaWrite_0 = 0x1111222233334444;
-
-  uint8_t provaa1[4] = {100,60,26,46};
-  uint64_t provaaRead = 0;
-  uint64_t provaaRead_0 = 0;
-
-  uint8_t provaa3[4] = {0,0,0,0};
-  uint8_t prova4 = 0;
-  //Write_Flash(0x08004000,&provaa,1);
-  Flash_Write_Data(TEST_ADDRESS,&provaaWrite,sizeof(provaaWrite)/8);
-  DelayMs( 300 );
-  Flash_Read_Data(TEST_ADDRESS,&provaaRead,sizeof(provaaRead)/8);
-  DelayMs( 300 );
-  //Flash_Write_Data(NOMINAL_ADDR,&provaaWrite_0,sizeof(provaaWrite_0)/8);
-  DelayMs( 300 );
-  //Flash_Read_Data(NOMINAL_ADDR,&provaaRead_0,sizeof(provaaRead_0)/8);
-  //Write_Flash(CURRENT_STATE_ADDR+0x4000,&provaa,1);
-  */
-
-  /*
-  DelayMs( 300 );
-  //Write_Flash(CURRENT_STATE_ADDR+0x8000,&provaa,1);
-  DelayMs( 300 );
-  Write_Flash(0x08008010,&provaa1,sizeof(provaa1));
-  DelayMs( 300 );
-  Read_Flash(PREVIOUS_STATE_ADDR,&provaa3,sizeof(provaa3));
-  DelayMs( 300 );
-  Read_Flash(CURRENT_STATE_ADDR,&provaa2,sizeof(provaa2));
-  DelayMs( 300 );
-  Read_Flash(0x08008001,&prova4,sizeof(prova4));
-*/
-  //Read_Flash(CURRENT_STATE_ADDR,&provaa2,1 );
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -296,6 +152,7 @@ int main(void)
   {
 	  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	  HAL_Delay(1000);
+	  eighttosixfour();
 	  StateMachine();	//COMMS FUNCTION
     /* USER CODE END WHILE */
 

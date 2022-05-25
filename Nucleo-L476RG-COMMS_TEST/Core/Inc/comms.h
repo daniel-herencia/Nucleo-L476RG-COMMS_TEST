@@ -57,7 +57,7 @@
 #define LORA_FIX_LENGTH_PAYLOAD_ON                  false
 #define LORA_IQ_INVERSION_ON                        false
 #define LORA_FIX_LENGTH_PAYLOAD_LEN                 19
-#define WINDOW_SIZE									20
+#define WINDOW_SIZE									10
 
 /*
 #elif defined( USE_MODEM_FSK )
@@ -77,10 +77,10 @@
 #define RX_TIMEOUT_VALUE                            4000
 //#define BUFFER_SIZE                                 64 // Define the payload size here
 
-#define BUFFER_SIZE                                 40 // Define the payload size here
+#define BUFFER_SIZE                                 100//40 // Define the payload size here
 #define BUFFER_SIZE_RX								20
 
-#define MEMORY_SIZE									300
+#define MEMORY_SIZE									2500//300
 #define MEMORY_RX_SIZE								500
 
 
@@ -96,21 +96,21 @@
 
 // Apps CAD timer
 TimerEvent_t CADTimeoutTimer;
-#define CAD_TIMER_TIMEOUT       1000        //Define de CAD timer's timeout here
+#define CAD_TIMER_TIMEOUT       3000        //Define de CAD timer's timeout here
 
 TimerEvent_t RxAppTimeoutTimer;
-#define RX_TIMER_TIMEOUT        4000        //Define de CAD timer's timeout here
+#define RX_TIMER_TIMEOUT        3000        //Define de CAD timer's timeout here
 
 //CAD parameters
 #define CAD_SYMBOL_NUM          LORA_CAD_02_SYMBOL
-#define CAD_DET_PEAK            20
+#define CAD_DET_PEAK            22//20
 #define CAD_DET_MIN             10
 #define CAD_TIMEOUT_MS          2000
 #define NB_TRY                  10
 
 
 
-#define UPLINK_BUFFER_SIZE					15
+#define UPLINK_BUFFER_SIZE					100//15
 #define ACK_PAYLOAD_LENGTH					5			//ACK payload data length
 #define CONFIG_SIZE		13
 
@@ -199,9 +199,10 @@ void process_telecommand(uint8_t header, uint8_t info);
 
 bool pin_correct(uint8_t pin_1, uint8_t pin_2);
 
+void eighttosixfour (void);
+void sixfourtoeight(void);
 
-
-
+//void read_photo (uint16_t size);
 
 
 #endif /* INC_COMMS_H_ */

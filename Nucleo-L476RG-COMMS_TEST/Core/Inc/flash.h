@@ -75,10 +75,10 @@
 #define COUNT_RTX_ADDR 				0x08008202
 
 #define TEST_ADDRESS 				0x0800E860
+#define TEST_ADDRESS2 				0x0800EB80
 
 
-
-uint32_t Flash_Write_Data(uint32_t Address, uint64_t *Data_write, uint16_t numberofbytes);
+//uint32_t Flash_Write_Data(uint32_t Address, uint64_t *Data_write, uint16_t numberofbytes);
 
 void Write_Flash(uint32_t StartSectorAddress, uint64_t *Data, uint16_t numberofbytes);
 
@@ -87,6 +87,8 @@ void Flash_Read_Data(uint32_t Address, uint64_t *Data_read, uint16_t numberofbyt
 void Check_Redundancy(uint32_t Address, uint64_t *RxDef, uint16_t numberofbytes);
 
 void Read_Flash(uint32_t StartSectorAddress, uint64_t *RxBuf, uint16_t numberofbytes);
+uint32_t Flash_Write_Data(uint32_t StartPageAddress, uint64_t *Data, uint16_t numberofwords);
+//void Flash_Read_Data(uint32_t StartPageAddress, uint64_t *RxBuf, uint16_t numberofwords);
 
 #endif /* INC_FLASH_H_ */
 

@@ -81,74 +81,113 @@ static uint32_t Get_Bank(uint32_t Addr)
  *  returns: Nothing or error in case it fails			                              *
  *                                                                                    *
  **************************************************************************************/
-uint32_t Flash_Write_Data(uint32_t Address, uint64_t *Data_write, uint16_t numberofbytes) {
+uint32_t Flash_Write_Data(uint32_t StartPageAddress, uint64_t *Data, uint16_t numberofwords) {
 
-	uint32_t init_page = Get_Page( Address );
-	uint32_t finish_page = Get_Page( Address + 8*numberofbytes );
-	/* Unlock the Flash to enable the flash control register access *************/
-	HAL_FLASH_Unlock();
-
-	//pensar que pasa cuando los datos a escribir ocupan varias paginas
-	//la segunda iteracion del while hay que revisarla, porque ahora escribe lo mismo que la primera
-
-	while(init_page <= finish_page){
-		//Safe last page
-		uint64_t Data_ans[PAGESIZE/8];
-		uint32_t page_start_add;
-		if (Address <(FLASH_BASE + FLASH_BANK_SIZE))
-			page_start_add = FLASH_BASE + PAGESIZE*init_page;
-		else
-			page_start_add = FLASH_BASE + FLASH_BANK_SIZE + PAGESIZE*init_page;
-
-		Flash_Read_Data(page_start_add,&Data_ans,PAGESIZE/8);
-
-		//Erase Page
-		static FLASH_EraseInitTypeDef EraseInitStruct;
+//	uint32_t init_page = Get_Page( Address );
+//	uint32_t finish_page = Get_Page( Address + 8*numberofbytes );
+//	/* Unlock the Flash to enable the flash control register access *************/
+//	HAL_FLASH_Unlock();
+//
+//	//pensar que pasa cuando los datos a escribir ocupan varias paginas
+//	//la segunda iteracion del while hay que revisarla, porque ahora escribe lo mismo que la primera
+//
+//	while(init_page <= finish_page){
+//		//Safe last page
+//		uint64_t Data_ans[PAGESIZE/8];
+//		uint32_t page_start_add;
+//		if (Address <(FLASH_BASE + FLASH_BANK_SIZE))
+//			page_start_add = FLASH_BASE + PAGESIZE*init_page;
+//		else
+//			page_start_add = FLASH_BASE + FLASH_BANK_SIZE + PAGESIZE*init_page;
+//
+//		Flash_Read_Data(page_start_add,&Data_ans,PAGESIZE/8);
+//
+//		//Erase Page
+//		static FLASH_EraseInitTypeDef EraseInitStruct;
+//		uint32_t PAGEError;
+//		EraseInitStruct.Banks = Get_Bank( Address );//Bank where the erase address is located
+//		EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;//Erase by page
+//		EraseInitStruct.Page = Get_Page( Address );//Get page position
+//		EraseInitStruct.NbPages = 1;//Erase 1 page
+//		if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK) {
+//			return HAL_FLASH_GetError();
+//		}
+//
+//		uint32_t difference = (Address - page_start_add) / 8;
+//
+//
+//		//Write new data
+//		uint8_t bytes_write = numberofbytes;
+//		uint32_t write_address = Address;
+//		uint8_t position_wr = 0;
+//
+//		while(bytes_write > 0){
+//			HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, write_address, Data_write[position_wr]);
+//			write_address += 8;
+//			bytes_write--;
+//			position_wr++;
+//		}//*/
+//
+//		//Write old data
+/////*
+//		uint16_t bytes_write2 = PAGESIZE / 8;
+//		write_address = page_start_add;
+//		uint16_t position_wr2 = 0;
+//		while(bytes_write2 > 0){
+//			if (write_address != Address && Data_ans[position_wr2] != 0xFFFFFFFFFFFFFFFF){
+//				HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, write_address, Data_ans[position_wr2]);
+//			}
+//			write_address += 8;
+//			bytes_write2--;
+//			position_wr2++;
+//		}//*/
+//
+//		init_page++;
+//	}
+//	/* Lock the Flash to disable the flash control register access (recommended
+//	 to protect the FLASH memory against possible unwanted operation) *********/
+//	HAL_FLASH_Lock();
+//
+//	return 0;
+	static FLASH_EraseInitTypeDef EraseInitStruct;
 		uint32_t PAGEError;
-		EraseInitStruct.Banks = Get_Bank( Address );//Bank where the erase address is located
-		EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;//Erase by page
-		EraseInitStruct.Page = Get_Page( Address );//Get page position
-		EraseInitStruct.NbPages = 1;//Erase 1 page
+		int sofar = 0;
+
+		/* Unlock the Flash to enable the flash control register access *****/
+		HAL_FLASH_Unlock();
+
+		/* Erase the user Flash area*/
+
+		uint32_t StartPage = Get_Page(StartPageAddress);
+		uint32_t EndPageAdress = StartPageAddress + numberofwords * 8;
+		uint32_t EndPage = Get_Page(EndPageAdress);
+
+		/* Fill EraseInit structure*/
+		EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
+		EraseInitStruct.Page = StartPage;
+		EraseInitStruct.Banks = Get_Bank(StartPageAddress);
+		EraseInitStruct.NbPages = (EndPage - StartPage) + 1;
+
 		if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK) {
+
 			return HAL_FLASH_GetError();
 		}
-
-		uint32_t difference = (Address - page_start_add) / 8;
-
-
-		//Write new data
-		uint8_t bytes_write = numberofbytes;
-		uint32_t write_address = Address;
-		uint8_t position_wr = 0;
-
-		while(bytes_write > 0){
-			HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, write_address, Data_write[position_wr]);
-			write_address += 8;
-			bytes_write--;
-			position_wr++;
-		}//*/
-
-		//Write old data
-///*
-		uint16_t bytes_write2 = PAGESIZE / 8;
-		write_address = page_start_add;
-		uint16_t position_wr2 = 0;
-		while(bytes_write2 > 0){
-			if (write_address != Address && Data_ans[position_wr2] != 0xFFFFFFFFFFFFFFFF){
-				HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, write_address, Data_ans[position_wr2]);
+		while (sofar < numberofwords) {
+			if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, StartPageAddress, Data[sofar]) == HAL_OK) {
+				StartPageAddress += 8; // use StartPageAddress += 2 for half word and 8 for double word
+				sofar++;
+			} else {
+				/* Error occurred while writing data in Flash memory*/
+				return HAL_FLASH_GetError();
 			}
-			write_address += 8;
-			bytes_write2--;
-			position_wr2++;
-		}//*/
+		}
 
-		init_page++;
-	}
-	/* Lock the Flash to disable the flash control register access (recommended
-	 to protect the FLASH memory against possible unwanted operation) *********/
-	HAL_FLASH_Lock();
+		/* Lock the Flash to disable the flash control register access (recommended
+		 to protect the FLASH memory against possible unwanted operation) ***/
+		HAL_FLASH_Lock();
 
-	return 0;
+		return 0;
+
 }
 
 /**************************************************************************************
@@ -201,6 +240,14 @@ void Flash_Read_Data(uint32_t Address, uint64_t *Data_read, uint16_t numberofbyt
 		  bytes_read--;
 		  position_rd++;
 	  }
+//	while (1) {
+//			RxBuf = (__IO uint64_t) StartPageAddress;
+//			StartPageAddress += 8;	//perque += 1 ???? // Antes era +=1 y lo he cambiado a +=8
+//			RxBuf++;
+//			numberofwords--;
+//			if (numberofwords == 0)
+//				break;
+//		}
 }
 
 /**************************************************************************************
