@@ -47,7 +47,7 @@
                                                               //  1: 250 kHz,
                                                               //  2: 500 kHz,
                                                               //  3: Reserved]
-#define LORA_SPREADING_FACTOR                       7         // [SF7..SF12]
+#define LORA_SPREADING_FACTOR                       9//7         // [SF7..SF12]
 #define LORA_CODINGRATE                             1         // [1: 4/5,
                                                               //  2: 4/6,
                                                               //  3: 4/7,
@@ -77,12 +77,12 @@
 #define RX_TIMEOUT_VALUE                            4000
 //#define BUFFER_SIZE                                 64 // Define the payload size here
 
-#define BUFFER_SIZE                                 100//40 // Define the payload size here
+#define BUFFER_SIZE                                 128//100//40 // Define the payload size here  //bytes
 #define BUFFER_SIZE_RX								20
 
 #define MEMORY_SIZE									2500//300
 #define MEMORY_RX_SIZE								500
-
+#define TLE_PACKET_SIZE								66
 
 /*!
  *	CAD performance evaluation's parameters
@@ -199,8 +199,8 @@ void process_telecommand(uint8_t header, uint8_t info);
 
 bool pin_correct(uint8_t pin_1, uint8_t pin_2);
 
-void eighttosixfour (void);
-void sixfourtoeight(void);
+//void eighttosixfour (void);
+//void sixfourtoeight(void);
 
 //void read_photo (uint16_t size);
 
