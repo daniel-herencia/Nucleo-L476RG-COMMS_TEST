@@ -1,4 +1,25 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                             www.st.com/SLA0044
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -27,6 +48,8 @@ DAC_HandleTypeDef hdac1;
 
 I2C_HandleTypeDef hi2c1;
 
+IWDG_HandleTypeDef hiwdg;
+
 RTC_HandleTypeDef hrtc;
 
 SPI_HandleTypeDef hspi2;
@@ -35,6 +58,27 @@ TIM_HandleTypeDef htim16;
 
 UART_HandleTypeDef huart4;
 
+/* Definitions for OBC */
+osThreadId_t OBCHandle;
+const osThreadAttr_t OBC_attributes = {
+		.name = "OBC",
+		.stack_size = 4048 * 4,
+		.priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for COMMS */
+osThreadId_t COMMSHandle;
+const osThreadAttr_t COMMS_attributes = {
+		.name = "COMMS",
+		.stack_size = 4048 * 4,
+		.priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for ADCS */
+osThreadId_t ADCSHandle;
+const osThreadAttr_t ADCS_attributes = {
+		.name = "ADCS",
+		.stack_size = 4048 * 4,
+		.priority = (osPriority_t) osPriorityNormal,
+};
 /* USER CODE BEGIN PV */
 uint8_t timer_counter = 0;
 
@@ -232,6 +276,7 @@ uint8_t photo_vect[]={0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void SystemClockConfig( void );
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_RTC_Init(void);
@@ -240,8 +285,13 @@ static void MX_UART4_Init(void);
 static void MX_TIM16_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_DAC1_Init(void);
+static void MX_IWDG_Init(void);
+void StartOBC(void *argument);
+void StartCOMMS(void *argument);
+void StartADCS(void *argument);
+
 /* USER CODE BEGIN PFP */
-void SystemClockConfig( void );
+
 
 /* USER CODE END PFP */
 
@@ -273,7 +323,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  SystemClockConfig();
+  //SystemClockConfig();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -285,256 +335,92 @@ int main(void)
   MX_TIM16_Init();
   MX_ADC1_Init();
   MX_DAC1_Init();
+  MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
-  /*
-   * PROCEDURE TO WRITE IN FLASH:
-   * Read the whole page
-   * change the desired values in the variable read
-   * Erase the whole page
-   * Write the whole page
-   */
 
-  //HAL_FLASH_Unlock();
-  //Variables
-  uint64_t Wirten1[] = {0xABCDEFFECDBA1234,0xABCDEF1234567890,0xAAAAAAAABBBBBBBB,0xCCCCCCCCDDDDDDDD,
-		  	  	  	 0xCDFFAFABFEDCBAAA,0xABCDEF1234567890,0xAAAAAAAABBBBBBBB,0xCCCCCCCCDDDDDDDD};
-  uint64_t Data2 = 0xABCDEF1234567890;
-  uint32_t Address2 = 0x0800E860;
-  uint64_t variable1 = 0x8;
-  //uint64_t Read[] = {0,0,0,0,0,0};
-  uint64_t Read[10];
-  uint64_t Read2 = 0;
-  uint64_t Memory1[50];
-
-  uint8_t eight_bits = 0x3;
-
-
-  //uint64_t Data_ans[256];
-  //Flash_Read_Data(Address,&Data_ans,256);
-  //uint64_t Data_ans2[256];
-  HAL_Delay(10);
-  //Write_Flash(Address2,&variable1,bytes_write);
-  /*uint64_t eight_bytes = eight_bits;*/
-  /*uint16_t bytes_write = sizeof(eight_bytes)/8;*/
-  /*Flash_Write_Data(Address2,&eight_bytes,bytes_write);//THIS LINE WORKS*/
-/*
-  uint16_t bytes_read = sizeof(Read)/8;
-  Flash_Read_Data(Address,&Read,bytes_read);*/
-
-
-  /*
-  //Erase
-  static FLASH_EraseInitTypeDef EraseInitStruct;
-  uint32_t PAGEError;
-  EraseInitStruct.Banks = FLASH_BANK_1;//Bank where the erase address is located
-  EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;//Erase by page
-  EraseInitStruct.Page = (Address-FLASH_BASE)/FLASH_PAGE_SIZE;//Get page position
-  EraseInitStruct.NbPages = 1;//Erase 1 page
-  if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK) {
-  		return HAL_FLASH_GetError();
-  }
-  //Write
-  uint16_t bytes_write = sizeof(Data)/8;
-  uint32_t write_address = Address;
-  uint8_t position_wr = 0;
-  while(bytes_write > 0){
-	  HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, write_address, Data[position_wr]);
-	  write_address += 8;
-	  bytes_write--;
-	  position_wr++;
-  }
-  HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, Address2, Data2);
-  //Read
-  uint16_t bytes_read = sizeof(Read)/8;
-  Read2 = *(__IO uint64_t*) Address2;
-  uint32_t read_address = Address;
-  uint8_t position_rd = 0;
-  while (bytes_read > 0) {
-	  Read[position_rd] = *(__IO uint64_t*) read_address;
-	  read_address += 8;
-	  bytes_read--;
-	  position_rd++;
-  }
-  HAL_FLASH_Lock();
-  */
-  //TIMER TESTING
-  HAL_TIM_Base_Start_IT(&htim16);
-
-
-  // TEST WITH THE EEPROM EMULATION FILES
-  /*
-  //uint32_t len = ;
-  uint8_t provaaWrite = 0xCD;
-  uint8_t provaaRead = 0;
-  bool write_done;
-  bool read_done;
-  ee_init();
-  DelayMs( 300 );
-  write_done = ee_write(0x0800D000 , sizeof(provaaWrite), &provaaWrite);
-  //Flash_Write_Data(CURRENT_STATE_ADDR,&provaaWrite,sizeof(provaaWrite)/8);
-  DelayMs( 300 );
-  read_done = ee_read(0x0800D000, sizeof(provaaRead), &provaaRead);
-  //Flash_Read_Data(CURRENT_STATE_ADDR,&provaaRead,sizeof(provaaRead)/8);
-  DelayMs( 300 );
-*/
-
-
-
-/*
-  char *data = "hello FLASH from ControllerTech\
-  			  This is a test to see how many words can we work with";
-  uint64_t data2[] = {0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9};
-  uint64_t Rx_Data[30];
-  char string[100];
-  int number = 123;
-  float val = 123.456;
-  float RxVal;
-  Flash_Write_Data(0x08004410 , (uint64_t *)data2, 9);
-  Flash_Read_Data(0x08004410 , Rx_Data, 10);
-  int numofwords = (strlen(data)/8)+((strlen(data)%8)!=0);
-  Flash_Write_Data(0x08004810 , (uint64_t *)data, numofwords);
-  Flash_Read_Data(0x08004810 , Rx_Data, numofwords);
-  Convert_To_Str(Rx_Data, string);
-  Flash_Write_NUM(0x08005C10, number);
-  RxVal = Flash_Read_NUM(0x08005C10);
-  Flash_Write_NUM(0x08012000, val);
-  RxVal = Flash_Read_NUM(0x08012000);
-  */
-
-
-
-
-  //THIS CODE WORKS WELL
-  /*
-  uint64_t provaaWrite = 0xCDFFAFAB;
-  uint64_t provaaWrite_0 = 0x1111222233334444;
-  uint8_t provaa1[4] = {100,60,26,46};
-  uint64_t provaaRead = 0;
-  uint64_t provaaRead_0 = 0;
-  uint8_t provaa3[4] = {0,0,0,0};
-  uint8_t prova4 = 0;
-  //Write_Flash(0x08004000,&provaa,1);
-  Flash_Write_Data(TEST_ADDRESS,&provaaWrite,sizeof(provaaWrite)/8);
-  DelayMs( 300 );
-  Flash_Read_Data(TEST_ADDRESS,&provaaRead,sizeof(provaaRead)/8);
-  DelayMs( 300 );
-  //Flash_Write_Data(NOMINAL_ADDR,&provaaWrite_0,sizeof(provaaWrite_0)/8);
-  DelayMs( 300 );
-  //Flash_Read_Data(NOMINAL_ADDR,&provaaRead_0,sizeof(provaaRead_0)/8);
-  //Write_Flash(CURRENT_STATE_ADDR+0x4000,&provaa,1);
-  */
-
-  /*
-  DelayMs( 300 );
-  //Write_Flash(CURRENT_STATE_ADDR+0x8000,&provaa,1);
-  DelayMs( 300 );
-  Write_Flash(0x08008010,&provaa1,sizeof(provaa1));
-  DelayMs( 300 );
-  Read_Flash(PREVIOUS_STATE_ADDR,&provaa3,sizeof(provaa3));
-  DelayMs( 300 );
-  Read_Flash(CURRENT_STATE_ADDR,&provaa2,sizeof(provaa2));
-  DelayMs( 300 );
-  Read_Flash(0x08008001,&prova4,sizeof(prova4));
-*/
-  //Read_Flash(CURRENT_STATE_ADDR,&provaa2,1 );
   /* USER CODE END 2 */
+  initsensors(&hi2c1);
 
+  	RTC_TimeTypeDef sTime;
+  	RTC_DateTypeDef sDate;
+
+  	// RTC TEST -> OKEY
+  	uint32_t time_rtc;
+  	// HumanToUnixTime(&hrtc, time_rtc);
+  	HAL_IWDG_Refresh(&hiwdg);
+  	// Write the setTime -> OKEY
+  	uint32_t time = 1650363908, time2;
+  	// UnixToHumanTime(time, &hrtc);
+  	// See if the SetTime and SetDate are correct
+  	HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+  	HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* creation of OBC */
+  	OBCHandle = osThreadNew(StartOBC, NULL, &OBC_attributes);
+
+  	/* creation of COMMS */
+  	COMMSHandle = osThreadNew(StartCOMMS, NULL, &COMMS_attributes);
+
+  	/* creation of ADCS */
+  	ADCSHandle = osThreadNew(StartADCS, NULL, &ADCS_attributes);
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
   while (1)
   {
-	  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-//	  eighttosixfour();
-	  //Flash_Read_Data(TEST_ADDRESS,&Memory1,250);
-	  Flash_Write_Data(SAVE_PHOTO,&photo_vect,128);
-	  HAL_Delay(1000);
-	  StateMachine();	//COMMS FUNCTION
     /* USER CODE END WHILE */
+	  //COMMS TEST:
+	  //Flash_Write_Data(SAVE_PHOTO,&photo_vect,128);
+	  //HAL_Delay(1000);
+  	  //StateMachine();
+	  //PAYLOAD PROTOCOL ERROR
+	  /*if(!initCam(huart4)){
+		 		  errorProt(initCam, huart4);
+		 	  }
+
+		 	  if(!takePhoto(huart4)){
+		 		  errorProt(takePhoto, huart4);
+		 	  }
+
+		 	  break;
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
-
-
-
-void SystemClockConfig( void )
-{
-
-  RCC_OscInitTypeDef RCC_OscInitStruct;
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-  RCC_PeriphCLKInitTypeDef PeriphClkInit;
-
-    /**Configure LSE Drive Capability
-    */
-  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
-
-    /**Initializes the CPU, AHB and APB busses clocks
-    */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSE;
-  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = 16;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 10;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
-  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
-  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    //assert_failed(__FILE__, __LINE__);
-	  assert_param( FAIL );
-
-  }
-
-    /**Initializes the CPU, AHB and APB busses clocks
-    */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
-  {
-    //assert_failed(__FILE__, __LINE__);
-	  assert_param( FAIL );
-  }
-
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USART2;
-  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-  {
-    //assert_failed(__FILE__, __LINE__);
-	  assert_param( FAIL );
-  }
-
-    /**Configure the main internal regulator output voltage
-    */
-  if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
-  {
-    //assert_failed(__FILE__, __LINE__);
-	  assert_param( FAIL );
-  }
-
-    /**Configure the Systick interrupt time
-    */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-    /**Configure the Systick
-    */
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-}
-
-
 
 /**
   * @brief System Clock Configuration
@@ -744,6 +630,35 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief IWDG Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_IWDG_Init(void)
+{
+
+  /* USER CODE BEGIN IWDG_Init 0 */
+
+  /* USER CODE END IWDG_Init 0 */
+
+  /* USER CODE BEGIN IWDG_Init 1 */
+
+  /* USER CODE END IWDG_Init 1 */
+  hiwdg.Instance = IWDG;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_4;
+  hiwdg.Init.Window = 4095;
+  hiwdg.Init.Reload = 4095;
+  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN IWDG_Init 2 */
+
+  /* USER CODE END IWDG_Init 2 */
 
 }
 
@@ -996,7 +911,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
@@ -1025,6 +940,24 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 }
 
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END 5 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -1057,3 +990,5 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

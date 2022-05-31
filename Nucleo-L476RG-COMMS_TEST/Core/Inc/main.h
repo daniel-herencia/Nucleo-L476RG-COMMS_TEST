@@ -29,10 +29,16 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
-#include "comms.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "comms.h"
+#include "payload_camera.h"
+#include "adcs.h"
+#include "threads.h"
+#include "configuration.h"
+#include "utils.h"
+#include "utilities.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

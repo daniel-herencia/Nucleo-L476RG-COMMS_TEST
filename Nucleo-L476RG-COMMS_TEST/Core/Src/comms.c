@@ -658,7 +658,7 @@ void process_telecommand(uint8_t header, uint8_t info) {
 		Flash_Write_Data(EXIT_LOW_POWER_FLAG_ADDR, &info, 1);
 		info_write=1;
 		Flash_Write_Data(EXIT_SURVIVAL, &info_write, 1); //info_write has a value of 1 because of its TRUE to exit this state
-		//xTaskNotify("Task OBC", EXITSURVIVAL_NOTIFICATION, eSetBits); //Notification to OBC
+		//there's no need to send a notification because in survival state everything is on off.
 		break;
 	}
 	case EXIT_SUNSAFE:{ //Leave the sunsafe state

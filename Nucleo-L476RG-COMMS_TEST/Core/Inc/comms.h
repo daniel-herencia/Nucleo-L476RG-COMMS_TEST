@@ -1,9 +1,3 @@
-/*
- * comms.h
- *
- *  Created on: 24 feb. 2022
- *      Author: Daniel Herencia Ruiz
- */
 
 #ifndef INC_COMMS_H_
 #define INC_COMMS_H_
@@ -47,7 +41,7 @@
                                                               //  1: 250 kHz,
                                                               //  2: 500 kHz,
                                                               //  3: Reserved]
-#define LORA_SPREADING_FACTOR                       9//7         // [SF7..SF12]
+#define LORA_SPREADING_FACTOR                       7//9//7         // [SF7..SF12]
 #define LORA_CODINGRATE                             1         // [1: 4/5,
                                                               //  2: 4/6,
                                                               //  3: 4/7,
@@ -57,7 +51,7 @@
 #define LORA_FIX_LENGTH_PAYLOAD_ON                  false
 #define LORA_IQ_INVERSION_ON                        false
 #define LORA_FIX_LENGTH_PAYLOAD_LEN                 19
-#define WINDOW_SIZE									10
+#define WINDOW_SIZE									20//90//60//10
 
 /*
 #elif defined( USE_MODEM_FSK )
@@ -77,7 +71,7 @@
 #define RX_TIMEOUT_VALUE                            4000
 //#define BUFFER_SIZE                                 64 // Define the payload size here
 
-#define BUFFER_SIZE                                 128//100//40 // Define the payload size here  //bytes
+#define BUFFER_SIZE                                 100//128//100//40 // Define the payload size here  //bytes
 #define BUFFER_SIZE_RX								20
 
 #define MEMORY_SIZE									2500//300

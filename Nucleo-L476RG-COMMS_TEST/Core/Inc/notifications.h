@@ -1,9 +1,4 @@
-/*
- * notifications.h
- *
- *  Created on: 29 may. 2022
- *      Author: Usuari
- */
+
 
 #ifndef INC_NOTIFICATIONS_H_
 #define INC_NOTIFICATIONS_H_
@@ -15,6 +10,7 @@
 
 //COMMS NOTIFICATIONS
 #define EXITLOWPOWER_NOTIFICATION //Indicates to OBC to leave Comms LOWPOWER state
+#define EXIT_SLEEPMODE_NOTIFICATION
 
 //PAYLOAD NOTIFICATIONS
 #define TAKEPHOTO_NOTIFICATION  //Indicates to OBC to take a photo to camera
