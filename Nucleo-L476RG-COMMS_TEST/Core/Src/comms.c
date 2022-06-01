@@ -634,24 +634,24 @@ void process_telecommand(uint8_t header, uint8_t info) {
 	case NOMINAL:  //Modifies the nominal threshold used to change between each state.
 		info_write = info;
 		Flash_Write_Data(NOMINAL_ADDR, &info_write, 1);
-		//xTaskNotify("Task OBC", NOMINAL_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", NOMINAL_NOTIFICATION //Notification to OBC
 		break;
 	case LOW: //Modifies the low threshold used to change between each state.
 		info_write = info;
 		Flash_Write_Data(LOW_ADDR, &info_write, 1);
-		//xTaskNotify("Task OBC", LOW_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", LOW_NOTIFICATION //Notification to OBC
 		break;
 	case CRITICAL: //Modifies the critical threshold used to change between each state.
 		info_write = info;
 		Flash_Write_Data(CRITICAL_ADDR, &info_write, 1);
-		//xTaskNotify("Task OBC", CRITICAL_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", CRITICAL_NOTIFICATION" //Notification to OBC
 		break;
 	case EXIT_LOW_POWER:{  //Leave the low power state
 		info_write = info;
 		Flash_Write_Data(EXIT_LOW_POWER_FLAG_ADDR, &info_write, 1);
 		info_write=1;
 		Flash_Write_Data(EXIT_LOW_ADDR, &info_write, 1); //info_write has a value of 1 because of its TRUE to exit this state
-		//xTaskNotify("Task OBC", EXITLOWPOWER_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", EXITLOWPOWER_NOTIFICATION //Notification to OBC
 		break;
 	}
 	case EXIT_SURVIVAL:{ //Leave the survival state
@@ -665,7 +665,7 @@ void process_telecommand(uint8_t header, uint8_t info) {
 		Flash_Write_Data(EXIT_LOW_POWER_FLAG_ADDR, &info, 1);
 		info_write=1;
 		Flash_Write_Data(EXIT_SUNSAFE, &info_write, 1); //info_write has a value of 1 because of its TRUE to exit this state
-		//xTaskNotify("Task OBC", EXITSUNSAFE_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", EXITSUNSAFE_NOTIFICATION //Notification to OBC
 		break;
 	}
 	case SET_TIME:{ //Synchronises the time of both the satellite and the ground station
@@ -674,17 +674,14 @@ void process_telecommand(uint8_t header, uint8_t info) {
 			time[k]=Buffer[k+1];  //stored in the buffer
 		}
 		Flash_Write_Data(TEMP_ADDR, &time, sizeof(time)); //unix time format
-		//xTaskNotify("Task OBC", SETTIME_NOTIFICATION, eSetBits);
-		//if(xTaskNotifyWait(0x00, ULONG_MAX, &NotifiedValue, portMAXVALUE) == pdTRUE){    //waiting for the OBC notification (TIMERTC_NOTI)
-								//Flash_Read_Data(TIMERTC_ADDR, &time, TIME_SIZE);  //reading the TIMERTC_ADDR address
-								//Radio.Send(time, TIME_SIZE);     //send to the GS the address info
-		//}
+		//("Task OBC", SETTIME_NOTIFICATION)
+
 		break;
 	}
 	case SET_CONSTANT_KP:    //Updates the current constant proportional Kp
 		info_write=info;
 		Flash_Write_Data(KP_ADDR, &info_write, 1);
-		//xTaskNotify("Task OBC", SETCONSTANT_NOTIFICATION, eSetBits);  //Notification to OBC
+		//"Task OBC", SETCONSTANT_NOTIFICATION, //Notification to OBC
 		break;
 	case TLE:{  //Updates the current TLE of the orbit. Done in the ground station since its easier than doing it in the satellite.
 				//TLE’s are made with 2 arrays of 69 characters 138 bytes
@@ -716,14 +713,14 @@ void process_telecommand(uint8_t header, uint8_t info) {
 			tle_packets++;
 			tle_packets = 0;
 		}
-		//xTaskNotify("Task OBC", TLE_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", TLE_NOTIFICATION //Notification to OBC
 		break;
 	}
 	case SET_GYRO_RES: //Modifies the resolution needed for each gyroscope measurement.The starting value will be 16 (16 bits per measurement)
 		/*4 possibles estats, rebrem 00/01/10/11*/
 		info_write=info;
 		Flash_Write_Data(GYRO_RES_ADDR, &info_write, 1);
-		//xTaskNotify("Task OBC", SETGYRO_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", SETGYRO_NOTIFICATION,//Notification to OBC
 		break;
 	case SEND_DATA:{ //Informs the satellite when transmission is available
 		//Send data from payload. In the case of payload 1,there is a parameter to request big or small photos
@@ -789,7 +786,7 @@ void process_telecommand(uint8_t header, uint8_t info) {
 		if(calib_packets == integer_part+1){
 			calib_packets = 0;
 		}
-		//xTaskNotify("Task OBC", SENDCALIBRATION_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", SENDCALIBRATION_NOTIFICATION //Notification to OBC
 		break;
 	}
 	case TAKE_PHOTO:{ //Informs the satellite on when totake a photo, Sets the photo resolution, Sets the photo compression
@@ -799,7 +796,7 @@ void process_telecommand(uint8_t header, uint8_t info) {
 		Flash_Write_Data(PL_TIME_ADDR, &info, 4);
 		Flash_Write_Data(PHOTO_RESOL_ADDR, &Buffer[5], 1);
 		Flash_Write_Data(PHOTO_COMPRESSION_ADDR, &Buffer[6], 1);
-		//xTaskNotify("Task OBC", TAKEPHOTO_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", TAKEPHOTO_NOTIFICATION //Notification to OBC
 		break;
 	}
 	case TAKE_RF:{
@@ -810,7 +807,7 @@ void process_telecommand(uint8_t header, uint8_t info) {
 		Flash_Write_Data(F_MAX_ADDR, &Buffer[10], 1); //Sets the maximum frequency that will be swept by the electrosmog antenna.
 		Flash_Write_Data(DELTA_F_ADDR, &Buffer[11], 1); //Sets the step length (resolution) between each measurement
 		Flash_Write_Data(INTEGRATION_TIME_ADDR, &Buffer[12], 1);
-		//xTaskNotify("Task OBC", TAKERF_NOTIFICATION, eSetBits); //Notification to OBC
+		//"Task OBC", TAKERF_NOTIFICATION //Notification to OBC
 		//POSSIBILITAT D'INCLOURE, LUT amb llistat de freq ????Adriano ho va comentar
 		break;
 	}
